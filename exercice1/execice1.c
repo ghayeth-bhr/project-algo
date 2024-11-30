@@ -15,18 +15,19 @@ int main()
     {
         if (!strchr(c, s[i]))
         {
-            printf("Erreur : La chaîne doit contenir uniquement : () {} []\n");
-            test = false;
+
+            yesorno = false;
+            return 0;
         }
     }
 
-    if (test && l % 2 != 0)
+    if (l % 2 != 0)
     {
-        printf("Non\n");
+        yesorno = false;
         return 0;
     }
 
-    if (test && l % 2 == 0)
+    if (l % 2 == 0)
     {
         for (int i = 0, j = l - 1; i < l / 2 && j >= l / 2; i++, j--)
         {
@@ -36,14 +37,10 @@ int main()
                 break;
             }
 
-            if ((s[j] == s[i] + 1) || (s[j] == s[i] + 2))
-            {
-                yesorno = true;
-            }
-            else
+            if (!((s[j] == s[i] + 1) || (s[j] == s[i] + 2)))
             {
                 yesorno = false;
-                break;
+                return 0;
             }
         }
 
