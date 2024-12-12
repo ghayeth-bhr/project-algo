@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int max_subarray_sum_with_limit(int n, int k, int a[])
 {
@@ -35,33 +37,65 @@ int max_subarray_sum_with_limit(int n, int k, int a[])
     return max_sum;
 }
 
+void compareOutputs(int actual[], int expected[], int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (actual[i] == expected[i])
+        {
+            printf("Test Case %d: OK\n", i + 1);
+        }
+        else
+        {
+            printf("Test Case %d: Mismatch - Expected: %d, Got: %d\n", i + 1, expected[i], actual[i]);
+        }
+    }
+}
+
 int main()
 {
-    int n, k;
-
-    // Entrée de la taille du tableau et de la valeur de k
-    printf("Entrez la taille du tableau (n) : ");
-    scanf("%d", &n);
-    printf("Entrez la valeur maximale (k) : ");
-    scanf("%d", &k);
-
-    int a[n];
-
-    // Entrée des éléments du tableau
-    printf("Entrez les éléments du tableau :\n");
-    for (int i = 0; i < n; i++)
+    FILE *inputFile = fopen("input.txt", "r");
+    FILE *expectedFile = fopen("expected.txt", "r");
+    if (inputFile == NULL || expectedFile == NULL)
     {
-        scanf("%d", &a[i]);
-    }
-    if (k == 0)
-    {
-        printf("La somme maximale du sous-tableau est : %d\n", 0);
-        return 0;
+        printf("Could not open input or expected file\n");
+        return 1;
     }
 
-    // Appel de la fonction et affichage du résultat
-    int result = max_subarray_sum_with_limit(n, k, a);
-    printf("La somme maximale du sous-tableau est : %d\n", result);
+    char line[1000];
+    int actualOutputs[1000];
+    int expectedOutputs[1000];
+    int count = 0;
 
+    while (fgets(line, sizeof(line), inputFile))
+    {
+        int n, k;
+        sscanf(line, "%d %d", &n, &k);
+
+        int a[n];
+        fgets(line, sizeof(line), inputFile);
+        char *token = strtok(line, " ");
+        for (int i = 0; i < n; i++)
+        {
+            a[i] = atoi(token);
+            token = strtok(NULL, " ");
+        }
+
+        int result = max_subarray_sum_with_limit(n, k, a);
+        actualOutputs[count] = result;
+        count++;
+    }
+
+    count = 0;
+    while (fgets(line, sizeof(line), expectedFile))
+    {
+        expectedOutputs[count] = atoi(line);
+        count++;
+    }
+
+    compareOutputs(actualOutputs, expectedOutputs, count);
+
+    fclose(inputFile);
+    fclose(expectedFile);
     return 0;
 }

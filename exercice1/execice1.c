@@ -1,58 +1,92 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
-int main()
+#define MAX_SIZE 100000
+
+// Fonction pour vérifier si les parenthèses correspondent
+int isMatchingPair(char open, char close)
 {
-    char s[100000], c[] = "(){}[]";
-    int l;
-    bool test = true, yesorno = true;
+    return (open == '(' && close == ')') ||
+           (open == '[' && close == ']') ||
+           (open == '{' && close == '}');
+}
 
-    printf("Entrez une chaîne : ");
-    gets(s);
-    l = strlen(s);
-    for (int i = 0; i < l; i++)
+// Fonction pour vérifier si une chaîne est équilibrée
+const char *isBalanced(const char *s)
+{
+    char stack[MAX_SIZE];
+    int top = -1;
+
+    for (int i = 0; s[i] != '\0'; i++)
     {
-        if (!strchr(c, s[i]))
-        {
+        char current = s[i];
 
-            yesorno = false;
-            return 0;
+        // Si c'est une parenthèse ouvrante, on l'empile
+        if (current == '(' || current == '[' || current == '{')
+        {
+            stack[++top] = current;
         }
-    }
-
-    if (l % 2 != 0)
-    {
-        yesorno = false;
-        return 0;
-    }
-
-    if (l % 2 == 0)
-    {
-        for (int i = 0, j = l - 1; i < l / 2 && j >= l / 2; i++, j--)
+        // Si c'est une parenthèse fermante
+        else if (current == ')' || current == ']' || current == '}')
         {
-            if ((strchr(")]}", s[i]) || strchr("([{", s[j])))
+            if (top == -1 || !isMatchingPair(stack[top], current))
             {
-                yesorno = false;
-                break;
+                return "NO";
             }
-
-            if (!((s[j] == s[i] + 1) || (s[j] == s[i] + 2)))
-            {
-                yesorno = false;
-                return 0;
-            }
-        }
-
-        if (yesorno)
-        {
-            printf("Yes\n");
+            top--;
         }
         else
         {
-            printf("No\n");
+            // Si un caractère invalide est trouvé
+            return "NO";
         }
     }
+
+    return (top == -1) ? "YES" : "NO";
+}
+
+int main()
+{
+    FILE *inputFile = fopen("input.txt", "r");
+    FILE *expectedFile = fopen("expected.txt", "r");
+
+    if (inputFile == NULL || expectedFile == NULL)
+    {
+        printf("Erreur: Impossible d'ouvrir les fichiers.\n");
+        return 1;
+    }
+
+    char inputLine[MAX_SIZE];
+    char expectedLine[10];
+    int testCase = 1;
+
+    while (fgets(inputLine, sizeof(inputLine), inputFile) != NULL &&
+           fgets(expectedLine, sizeof(expectedLine), expectedFile) != NULL)
+    {
+
+        // Retirer les sauts de ligne
+        inputLine[strcspn(inputLine, "\n")] = '\0';
+        expectedLine[strcspn(expectedLine, "\n")] = '\0';
+
+        // Calculer le résultat obtenu
+        const char *result = isBalanced(inputLine);
+
+        // Comparer avec le résultat attendu
+        if (strcmp(result, expectedLine) == 0)
+        {
+            printf("Test Case %d: OK\n", testCase);
+        }
+        else
+        {
+            printf("Test Case %d: Mismatch - Expected: %s, Got: %s\n", testCase, expectedLine, result);
+        }
+
+        testCase++;
+    }
+
+    fclose(inputFile);
+    fclose(expectedFile);
 
     return 0;
 }

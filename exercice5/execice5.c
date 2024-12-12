@@ -2,70 +2,102 @@
 
 int main()
 {
-    int e, i, j, inc = 0;
-    printf("Donner le nombre d'evenement: ");
-    scanf("%d", &e);
+    FILE *inputFile, *expectedFile;
+    int e, i, j, inc, expectedOutput, actualOutput;
+    int caseNumber = 1;
 
-    if (e > 1000000)
+    // Open the input and expected files
+    inputFile = fopen("input.txt", "r");
+    expectedFile = fopen("expected.txt", "r");
+    if (inputFile == NULL || expectedFile == NULL)
     {
-        printf("Erreur : %d out of range\n", e);
-        return 0;
+        printf("Error: Unable to open input or expected file.\n");
+        return 1;
     }
 
-    int te[e];
-    printf("Donner les evenements: ");
-
-    for (i = 0; i < e; i++)
+    // Process each test case
+    while (fscanf(inputFile, "%d", &e) == 1)
     {
-        scanf("%d", &te[i]);
-        if ((te[i] > 10) && (te[i] != -1))
+        if (fscanf(expectedFile, "%d", &expectedOutput) != 1)
         {
-            printf("Evenement %d non disponible\n", te[i]);
-            return 0;
+            printf("Error: Mismatch in number of test cases between input.txt and expected.txt.\n");
+            break;
         }
-    }
 
-    // Find the first non -1 element
-    if (te[0] == -1)
-    {
-        while (te[inc] == -1 && inc < e)
+        if (e > 1000000)
+        {
+            printf("Erreur : %d out of range\n", e);
+            continue; // Skip this test case and continue with the next one
+        }
+
+        int te[e];
+        for (i = 0; i < e; i++)
+        {
+            fscanf(inputFile, "%d", &te[i]);
+            if ((te[i] > 10) && (te[i] != -1)) // Check for invalid event numbers
+            {
+                printf("Evenement %d non disponible\n", te[i]);
+                continue; // Skip the invalid event and go to the next test case
+            }
+        }
+
+        // Find the first non -1 element
+        inc = 0;
+        while (inc < e && te[inc] == -1) // Ensure that we find the first non -1 element
         {
             inc++;
         }
-    }
 
-    // Handle special cases for all events being -1
-    if (inc == e || inc == e - 1)
-    {
-        printf("%d\n", inc);
-        return 0;
-    }
-
-    // Process the events
-    for (i = inc; i < e; i++)
-    {
-        j = i + 1;
-        while (te[i] > 0 && j < e)
+        // Handle special cases for all events being -1
+        if (inc == e || inc == e - 1) // If all events are -1
         {
-            if (te[j] == -1)
+            actualOutput = inc;
+        }
+        else
+        {
+            // Process the events
+            for (i = inc; i < e; i++)
             {
-                te[j] = te[j] + 1;
-                te[i] = te[i] - 1;
-                j++; // Move to the next event
+                j = i + 1;
+                while (te[i] > 0 && j < e)
+                {
+                    if (te[j] == -1)
+                    {
+                        te[j] = te[j] + 1;
+                        te[i] = te[i] - 1;
+                        j++; // Move to the next event
+                    }
+                    j++;
+                }
             }
-            j++;
-        }
-    }
 
-    int count = 0;
-    for (i = 0; i < e; i++)
-    {
-        if (te[i] == -1)
+            // Count the number of -1 elements remaining
+            int count = 0;
+            for (i = 0; i < e; i++)
+            {
+                if (te[i] == -1)
+                {
+                    count++;
+                }
+            }
+            actualOutput = count;
+        }
+
+        // Compare the actual output with the expected output
+        if (actualOutput == expectedOutput)
         {
-            count++;
+            printf("Case %d matched\n", caseNumber);
         }
+        else
+        {
+            printf("Case %d mismatched (Expected: %d, Got: %d)\n", caseNumber, expectedOutput, actualOutput);
+        }
+
+        caseNumber++;
     }
 
-    printf("%d\n", count);
+    // Close the files
+    fclose(inputFile);
+    fclose(expectedFile);
     return 0;
 }

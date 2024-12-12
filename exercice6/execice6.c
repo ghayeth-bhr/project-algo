@@ -1,53 +1,61 @@
 #include <stdio.h>
-#include <gmp.h>
+#include <string.h>
 
-// Fonction pour calculer le PGCD
-int diviseurCommunMaximal(int l, int m)
+#define MAX_SIZE 1020
+
+// Fonction pour lire et traiter chaque cas de test
+void processTestCase(char *a, char *b, char *expected)
 {
-    int min = l, i;
-    if (l > m)
+    char result[MAX_SIZE];
+
+    // Vérifier si a et b sont égaux
+    if (strcmp(a, b) == 0)
     {
-        min = m;
+        // Si a et b sont identiques, le PGCD est a (ou b)
+        strcpy(result, a);
+    }
+    else
+    {
+        // Si a et b sont différents, le PGCD est 1
+        strcpy(result, "1");
     }
 
-    for (i = min; i > 0; i--)
+    // Comparer le résultat obtenu avec le résultat attendu
+    if (strcmp(result, expected) == 0)
     {
-        if (l % i == 0 && m % i == 0)
-        {
-            return i;
-        }
+        printf("Test Case: OK\n");
     }
-    return 1;
+    else
+    {
+        printf("Test Case: Mismatch - Expected: %s, Got: %s\n", expected, result);
+    }
 }
 
 int main()
 {
-    mpz_t a, b;
-    int result;
+    FILE *inputFile = fopen("input.txt", "r");
+    FILE *expectedFile = fopen("expected.txt", "r");
 
-    // Initialiser les variables GMP
-    mpz_init(a);
-    mpz_init(b);
-
-    // Demander à l'utilisateur de saisir les valeurs de a et b
-    printf("Entrez a et b : \n");
-    gmp_scanf("%Zd %Zd", a, b);
-
-    // Vérifier si a et b sont égaux
-    if (mpz_cmp(a, b) == 0)
+    if (inputFile == NULL || expectedFile == NULL)
     {
-        // Si a == b, alors le PGCD est a (ou b)
-        gmp_printf("%Zd\n", a);
-    }
-    else
-    {
-        // Si a != b, le PGCD de tous les entiers entre a et b est 1
-        printf("1\n");
+        printf("Erreur: Impossible d'ouvrir les fichiers.\n");
+        return 1;
     }
 
-    // Libérer la mémoire allouée aux variables GMP
-    mpz_clear(a);
-    mpz_clear(b);
+    char a[MAX_SIZE], b[MAX_SIZE], expected[MAX_SIZE];
+
+    // Lire chaque ligne de input.txt et expected.txt
+    while (fscanf(inputFile, "%s %s", a, b) != EOF && fgets(expected, sizeof(expected), expectedFile) != NULL)
+    {
+        // Retirer le saut de ligne de la ligne attendue
+        expected[strcspn(expected, "\n")] = '\0';
+
+        // Traiter le cas de test
+        processTestCase(a, b, expected);
+    }
+
+    fclose(inputFile);
+    fclose(expectedFile);
 
     return 0;
 }
